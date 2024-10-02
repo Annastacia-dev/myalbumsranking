@@ -11,6 +11,7 @@ const App = () => {
     const [loading, setLoading] = useState(false);
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const [searchQuery, setSearchQuery] = useState(''); // New state for the search query
 
     const currentYear = new Date().getFullYear(); // Get the current year
 
@@ -42,7 +43,7 @@ const App = () => {
         }
     };
 
-    // Fetch albums released in the current year and filter by album type (full albums)
+    // Fetch albums based on search query and filter by album type (full albums)
     const fetchAlbums = async (offset) => {
         if (!accessToken) return;
 
@@ -55,7 +56,7 @@ const App = () => {
                     Authorization: `Bearer ${accessToken}`,
                 },
                 params: {
-                    q: `year:${currentYear}`, // Query albums from the current year
+                    q: `${searchQuery ? `${searchQuery} ` : ''}year:${currentYear}`, // Search by query with year restriction
                     type: 'album',
                     limit: limit,
                     offset: offset,
@@ -94,7 +95,15 @@ const App = () => {
             if (albumsWithTrackData.length === 0) {
                 setHasMore(false);
             } else {
-                setAlbums(prevAlbums => [...prevAlbums, ...albumsWithTrackData]);
+                setAlbums(prevAlbums => {
+                    // Combine new albums with existing ones, ensuring uniqueness by album.id
+                    const allAlbums = [...prevAlbums, ...albumsWithTrackData];
+                    const uniqueAlbums = allAlbums.filter(
+                        (album, index, self) =>
+                            index === self.findIndex((a) => a.id === album.id) // Check uniqueness by album.id
+                    );
+                    return uniqueAlbums;
+                });
             }
         } catch (err) {
             console.error('Error fetching albums', err);
@@ -116,16 +125,30 @@ const App = () => {
         fetchAccessToken();
     }, []);
 
-    // Fetch albums when access token or offset changes
+    // Fetch albums when access token, offset, or search query changes
     useEffect(() => {
         if (accessToken) {
+            setAlbums([]); // Clear previous albums on new search
+            setOffset(0);  // Reset offset
             fetchAlbums(offset);
         }
-    }, [accessToken, offset]);
+    }, [accessToken, searchQuery, offset]);
 
     return (
-        <div className="p-5 md:flex flex-col hidden">
+        <div className="p-5">
             {error && <p className="text-red-500 text-center">{error}</p>}
+
+            {/* Search bar */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Search by album or artist"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded"
+                />
+            </div>
+
             <ul className="grid lg:grid-cols-3 md:grid-cols-2 gap-4">
                 {albums.length > 0 ? (
                     albums.map((album, index) => (
@@ -142,6 +165,7 @@ const App = () => {
                     <li className="text-center">Loading...</li>
                 )}
             </ul>
+
             {loading && <p className="text-center">Loading more albums...</p>}
             {hasMore && !loading && (
                 <button 
