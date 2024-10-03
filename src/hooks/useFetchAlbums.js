@@ -64,7 +64,7 @@ const useFetchAlbums = (searchQuery = "", currentYear = new Date().getFullYear()
 
             // Filter out singles
             const fullAlbums = fetchedAlbums.filter(
-                (album) => album && album.album_type === 'album'
+                (album) => album && album.album_type === "album"
             );
 
             // Fetch track data to sum popularity
@@ -86,7 +86,7 @@ const useFetchAlbums = (searchQuery = "", currentYear = new Date().getFullYear()
                         totalPopularity += track.popularity;
                     }
 
-                    return { ...album, totalPopularity }; 
+                    return { ...album, totalPopularity };
                 })
             );
 
@@ -127,8 +127,14 @@ const useFetchAlbums = (searchQuery = "", currentYear = new Date().getFullYear()
 
     useEffect(() => {
         if (accessToken) {
-            setAlbums([]); 
-            setOffset(0); 
+            // Reset albums when searchQuery is empty
+            if (searchQuery === "") {
+                setAlbums([]);
+                setHasMore(true); // Reset hasMore to true to allow for new searches
+            } else {
+                setAlbums([]);
+                setOffset(0);
+            }
             fetchAlbums();
         }
     }, [accessToken, searchQuery, offset]);

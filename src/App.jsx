@@ -1,7 +1,7 @@
 import Albums from "./components/Albums";
 import Ranking from "./components/Ranking";
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 function App() {
   return (
