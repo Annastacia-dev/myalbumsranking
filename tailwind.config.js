@@ -6,6 +6,13 @@ export default {
       fontFamily: {
         montserrat: ['"Montserrat", system-ui'],
       },
+      colors: {
+        "primary": '#141B41',
+        "secondary": '#306BAC',
+        "tertiary": '#6F9CEB',
+        "postgrad": '#98B9F2',
+        'phd': '#918EF4'
+      }
     },
   },
   plugins: [],

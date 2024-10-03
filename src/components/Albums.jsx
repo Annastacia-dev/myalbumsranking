@@ -22,7 +22,7 @@ const Album = ({ album }) => {
     >
       <img src={album.images[0]?.url} alt={album.name} className="rounded" />
       <div className="absolute inset-0 flex items-center  bg-black text-white bg-opacity-80  opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="album-details text-sm p-2 flex flex-col gap-1 capitalize">
+        <div className="album-details text-xs p-2 flex flex-col gap-1 capitalize">
           <h2 className="font-semibold">{album.name}</h2>
           <p className="">
             {album.artists.map((artist) => artist.name).join(", ")}
