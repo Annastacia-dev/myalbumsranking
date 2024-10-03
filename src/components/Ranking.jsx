@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
 import { AlbumSearchModal } from "./AlbumSearchModal";
+import { MdOutlineFileDownload, MdAdd } from "react-icons/md";
+import PropTypes from "prop-types";
 
 const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "ALBUM_RANK",
-    item: { index }, // The index of the dragged album
+    item: { index },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
   const [{ isOver }, drop] = useDrop({
-    accept: ["ALBUM", "ALBUM_RANK"], // Accept both ALBUM and ALBUM_RANK types
+    accept: ["ALBUM", "ALBUM_RANK"],
     drop: (item, monitor) => {
-      // Handle dropping of an album from the Albums list
       if (monitor.getItemType() === "ALBUM") {
-        addAlbum(index, item.album); // Add album from Albums
+        addAlbum(index, item.album);
       }
-      // Handle reordering within the Ranking list
       if (monitor.getItemType() === "ALBUM_RANK") {
-        moveAlbum(item.index, index); // Reorder albums in ranking
+        moveAlbum(item.index, index);
       }
     },
     collect: (monitor) => ({
@@ -32,26 +32,36 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
 
   return (
     <li
-      ref={(node) => drag(drop(node))} // Connect both drag and drop
-      className={`mb-2 border border-gray-300 rounded-lg p-4 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-green-100" : ""}`}
+      ref={(node) => drag(drop(node))}
+      className={`mb-2 border border-gray-300 rounded p-1 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-green-100" : ""}`}
     >
       {album ? (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 relative">
           <img
             src={album.images[0]?.url}
             alt={album.name}
             className="rounded w-20 object-cover"
+            crossOrigin="anonymous" // For CORS
+            onError={(e) => {
+              e.target.onerror = null;
+            }}
           />
           <div className="flex flex-col gap-1 md:text-sm text-xs">
             <p className="font-semibold md:w-3/4">{album.name}</p>
             <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
           </div>
+          <p className="font-black absolute opacity-50 right-1 top-0">
+            {index + 1}
+          </p>
         </div>
       ) : (
         <div>
-          <span className="md:block hidden">Drag an album here</span>
-          <button className="block md:hidden" onClick={() => openModal(index)}>
-            Add an album
+          <span className="md:block hidden p-3">Drag an album here</span>
+          <button
+            className="md:hidden flex items-center gap-3 p-3"
+            onClick={() => openModal(index)}
+          >
+            <MdAdd /> Add an album
           </button>
         </div>
       )}
@@ -61,7 +71,6 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
 
 const Ranking = () => {
   const [rankings, setRankings] = useState(() => {
-    // Retrieve rankings from localStorage or initialize to empty
     const storedRankings = localStorage.getItem("rankings");
     return storedRankings ? JSON.parse(storedRankings) : Array(5).fill(null);
   });
@@ -70,21 +79,26 @@ const Ranking = () => {
   const [currentIndex, setCurrentIndex] = useState(null);
 
   useEffect(() => {
-    // Save rankings to localStorage whenever they change
     localStorage.setItem("rankings", JSON.stringify(rankings));
   }, [rankings]);
 
   const moveAlbum = (fromIndex, toIndex) => {
     const newRankings = [...rankings];
-    const [movedAlbum] = newRankings.splice(fromIndex, 1); // Remove the album from its original position
-    newRankings.splice(toIndex, 0, movedAlbum); // Insert it at the new position
+    const [movedAlbum] = newRankings.splice(fromIndex, 1);
+    newRankings.splice(toIndex, 0, movedAlbum);
     setRankings(newRankings);
   };
 
   const addAlbum = (index, album) => {
     const newRankings = [...rankings];
-    newRankings[index] = album;
-    setRankings(newRankings);
+
+    // Check for duplicates
+    if (!newRankings.includes(album)) {
+      newRankings[index] = album;
+      setRankings(newRankings);
+    } else {
+      alert("This album is already in the rankings!");
+    }
   };
 
   const openModal = (index) => {
@@ -105,7 +119,7 @@ const Ranking = () => {
 
   const downloadRanking = () => {
     const rankingElement = document.getElementById("ranking");
-    html2canvas(rankingElement).then((canvas) => {
+    html2canvas(rankingElement, { scale: 2 }).then((canvas) => {
       canvas.toBlob((blob) => {
         saveAs(blob, "album-ranking.png");
       });
@@ -113,39 +127,64 @@ const Ranking = () => {
   };
 
   return (
-    <div className="p-5">
-      <div id="ranking" className="p-4">
-        <h2 className="text-lg font-semibold">My Album Rankings:</h2>
-        <ol className="list-decimal pl-5">
+    <div className="flex flex-col p-5 ">
+      <div className="flex justify-between">
+        <p></p>
+        <button
+          onClick={downloadRanking}
+          className={`mt-4 ${rankings.length < 5 ? "" : "bg-purple-500"} text-white rounded px-4 py-2`}
+          disabled={rankings.length < 5}
+        >
+          <MdOutlineFileDownload className="text-xl" />
+        </button>
+      </div>
+      <div id="ranking" className="p-2 flex flex-col gap-3">
+        <h2 className="text-base uppercase font-semibold ml-2">
+          My Album Rankings
+        </h2>
+        <ul className="flex flex-col md:gap-0 gap-4">
           {rankings.map((album, index) => (
             <RankingPosition
               key={index}
               index={index}
               album={album}
-              moveAlbum={moveAlbum} // Handle moving albums between positions
+              moveAlbum={moveAlbum}
               addAlbum={addAlbum}
-              openModal={openModal} // Pass function to open modal
+              openModal={openModal}
             />
           ))}
-        </ol>
+        </ul>
       </div>
-
-      <button
-        onClick={downloadRanking}
-        className="mt-4 bg-purple-500 text-white rounded px-4 py-2"
-      >
-        Download Ranking
-      </button>
-
-      {/* Render the modal */}
       {isModalOpen && (
         <AlbumSearchModal
           closeModal={closeModal}
-          addAlbum={handleAlbumSelect} // Handle album selection
+          addAlbum={handleAlbumSelect}
         />
       )}
     </div>
   );
+};
+
+RankingPosition.propTypes = {
+  album: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    images: PropTypes.arrayOf(
+      PropTypes.shape({
+        url: PropTypes.string,
+      }),
+    ),
+    artists: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string,
+      }),
+    ),
+    release_date: PropTypes.string,
+  }),
+  index: PropTypes.number,
+  moveAlbum: PropTypes.func,
+  addAlbum: PropTypes.func,
+  openModal: PropTypes.func,
 };
 
 export default Ranking;

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import useFetchAlbums from "../hooks/useFetchAlbums";
+import PropTypes from "prop-types";
 
 export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { albums, loading, error, loadMoreAlbums } =
-    useFetchAlbums(searchQuery); // Use the hook with search query
+  const { albums, loading, loadMoreAlbums } = useFetchAlbums(searchQuery);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -53,4 +53,9 @@ export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
       </div>
     </div>
   );
+};
+
+AlbumSearchModal.propTypes = {
+  addAlbum: PropTypes.func,
+  closeModal: PropTypes.func,
 };

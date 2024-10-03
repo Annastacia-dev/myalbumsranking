@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useDrag } from "react-dnd";
 import useFetchAlbums from "../hooks/useFetchAlbums";
+import { FaSpinner } from "react-icons/fa";
+import PropTypes from "prop-types";
 
 const Album = ({ album }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -18,11 +20,7 @@ const Album = ({ album }) => {
         isDragging ? "opacity-50" : ""
       }`}
     >
-      <img
-        src={album.images[0]?.url}
-        alt={album.name}
-        className="rounded-t-lg"
-      />
+      <img src={album.images[0]?.url} alt={album.name} className="rounded" />
       <div className="absolute inset-0 flex items-center  bg-black text-white bg-opacity-80  opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div className="album-details text-sm p-2 flex flex-col gap-1 capitalize">
           <h2 className="font-semibold">{album.name}</h2>
@@ -41,7 +39,7 @@ const Album = ({ album }) => {
 const Albums = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { albums, loading, error, hasMore, loadMoreAlbums } = useFetchAlbums(searchTerm);
+  const { albums, loading } = useFetchAlbums(searchTerm);
 
   // Filter albums based on search term
   const filteredAlbums = albums.filter((album) =>
@@ -57,23 +55,42 @@ const Albums = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <ul className="grid lg:grid-cols-3 md:grid-cols-2 gap-4">
-        {filteredAlbums.map((album, index) => (
-          <Album key={album.id} album={album} />
-        ))}
-      </ul>
+      {!loading && filteredAlbums.length === 0 ? (
+        <p className="text-center text-red-500">No albums found</p> // Display not found message
+      ) : (
+        <ul className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
+          {filteredAlbums.slice(0, 12).map((album) => (
+            <Album key={album.id} album={album} />
+          ))}
+        </ul>
+      )}
 
-      {loading && <p className="text-center">Loading more albums...</p>}
-      {hasMore && !loading && (
-        <button
-          onClick={loadMoreAlbums}
-          className="block mx-auto mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
-        >
-          Load More
-        </button>
+      {loading && (
+        <div className="min-h-60 flex flex-col justify-center items-center gap-4 ">
+          <FaSpinner className="2xl animate-spin" />
+          <p>Hang on ...</p>
+        </div>
       )}
     </div>
   );
+};
+
+Album.propTypes = {
+  album: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    images: PropTypes.arrayOf(
+      PropTypes.shape({
+        url: PropTypes.string.isRequired,
+      }),
+    ).isRequired,
+    artists: PropTypes.arrayOf(
+      PropTypes.shape({
+        name: PropTypes.string.isRequired,
+      }),
+    ).isRequired,
+    release_date: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default Albums;
