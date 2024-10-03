@@ -30,21 +30,49 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
     }),
   });
 
+  const [albumCover, setAlbumCover] = useState(null);
+
+  // Function to convert the album image to a base64 string
+  const loadImageAsBase64 = (url) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous"; // Allow CORS
+      img.src = url;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = (err) => reject(err);
+    });
+  };
+
+  useEffect(() => {
+    if (album && album.images && album.images[0]) {
+      loadImageAsBase64(album.images[0].url)
+        .then((base64Image) => {
+          setAlbumCover(base64Image);
+        })
+        .catch((err) => {
+          console.error("Error loading image:", err);
+        });
+    }
+  }, [album]);
+
   return (
     <li
       ref={(node) => drag(drop(node))}
-      className={`mb-2 border border-gray-300 rounded p-1 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-green-100" : ""}`}
+      className={`mb-2 border border-gray-300 rounded p-1 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-secondary/20" : ""}`}
     >
       {album ? (
         <div className="flex items-center gap-3 relative">
           <img
-            src={album.images[0]?.url}
+            src={albumCover || album.images[0]?.url}
             alt={album.name}
             className="rounded w-20 object-cover"
-            crossOrigin="anonymous" // For CORS
-            onError={(e) => {
-              e.target.onerror = null;
-            }}
           />
           <div className="flex flex-col gap-1 md:text-sm text-xs">
             <p className="font-semibold md:w-3/4">{album.name}</p>
@@ -132,7 +160,7 @@ const Ranking = () => {
         <p></p>
         <button
           onClick={downloadRanking}
-          className={`mt-4 ${rankings.length < 5 ? "" : "bg-purple-500"} text-white rounded px-4 py-2`}
+          className={`mt-4 ${rankings.length < 5 ? "" : "bg-primary"} text-white rounded px-4 py-2`}
           disabled={rankings.length < 5}
         >
           <MdOutlineFileDownload className="text-xl" />
