@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useDrag } from "react-dnd";
 import useFetchAlbums from "../hooks/useFetchAlbums";
-import { FaSpinner } from "react-icons/fa";
+import Loader from "./Loader";
 import PropTypes from "prop-types";
+import { PiSpinnerBold } from "react-icons/pi";
 
 const Album = ({ album }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -39,7 +40,7 @@ const Album = ({ album }) => {
 const Albums = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { albums, loading } = useFetchAlbums(searchTerm);
+  const { albums, loading, loadMoreAlbums } = useFetchAlbums(searchTerm);
 
   // Filter albums based on search term
   const filteredAlbums = albums.filter((album) =>
@@ -55,21 +56,26 @@ const Albums = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
+       {loading && <Loader />}
       {!loading && filteredAlbums.length === 0 ? (
         <p className="text-center text-red-500">No albums found</p> // Display not found message
       ) : (
-        <ul className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
-          {filteredAlbums.slice(0, 12).map((album) => (
-            <Album key={album.id} album={album} />
-          ))}
-        </ul>
-      )}
+        <>
+          <ul className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
+            {filteredAlbums.slice(0, 12).map((album) => (
+              <Album key={album.id} album={album} />
+            ))}
+          </ul>
 
-      {loading && (
-        <div className="min-h-60 flex flex-col justify-center items-center gap-4 ">
-          <FaSpinner className="2xl animate-spin" />
-          <p>Hang on ...</p>
-        </div>
+          <div className="flex items-center mt-4 gap-4">
+            <button
+              onClick={loadMoreAlbums}
+              className="bg-primary text-white px-4 py-2 rounded md:text-sm text-xs flex items-center gap-1 "
+            >
+              <PiSpinnerBold /> Load more
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

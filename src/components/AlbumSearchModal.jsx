@@ -1,6 +1,9 @@
 import { useState } from "react";
 import useFetchAlbums from "../hooks/useFetchAlbums";
 import PropTypes from "prop-types";
+import Loader from "./Loader";
+import { IoClose, IoSearch } from "react-icons/io5";
+import { PiSpinnerBold } from "react-icons/pi";
 
 export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -8,18 +11,26 @@ export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-5 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Search Albums</h2>
-        <input
-          type="text"
-          placeholder="Search for an album"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 rounded px-2 py-1 mb-4"
-        />
+      <div className="bg-gray-100 p-5 rounded-lg">
+        <div className="relative flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Search for an album"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border border-gray-300 bg-transparent rounded px-4 py-1  text-sm focus:ring-black"
+          />
+          <IoSearch className="absolute top-2 text-sm right-12 text-gray-400" />
+          <button
+            onClick={closeModal}
+            className="bg-red-600 text-white px-2 py-2 rounded flex gap-1 text-xs items-center"
+          >
+            <IoClose className="text-md" />
+          </button>
+        </div>
 
-        <ul>
-          {albums.map((album) => (
+        <ul className="mt-4">
+          {albums.slice(0, 6).map((album) => (
             <li
               key={album.id}
               className="flex items-center gap-3 mb-2"
@@ -37,19 +48,15 @@ export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
             </li>
           ))}
         </ul>
-        {loading && <p>Loading...</p>}
-        <button
-          onClick={loadMoreAlbums}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Load More
-        </button>
-        <button
-          onClick={closeModal}
-          className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-        >
-          Close
-        </button>
+        {loading && <Loader />}
+        <div className="flex items-center mt-4 gap-4">
+          <button
+            onClick={loadMoreAlbums}
+            className="bg-primary text-white px-4 py-2 rounded text-xs flex items-center gap-1 "
+          >
+            <PiSpinnerBold /> Load more
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -78,7 +78,7 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
             <p className="font-semibold md:w-3/4">{album.name}</p>
             <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
           </div>
-          <p className="font-black absolute opacity-50 right-1 top-0">
+          <p className="font-black absolute opacity-50 right-1 bottom-0 md:text-sm text-xs">
             {index + 1}
           </p>
         </div>
