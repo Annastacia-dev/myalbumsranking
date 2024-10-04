@@ -1,8 +1,24 @@
-# React + Vite
+# MyAlbums Ranking
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MyAlbums Ranking is a web application that allows users to rank albums released in the current year.The app integrates with the Spotify API to fetch album data.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Album Ranking: Rank your favorite albums.
+
+Spotify Integration: Fetch album data directly from Spotify.
+
+Drag-and-Drop Ranking: On medium and larger screens, drag albums to reorder rankings. On smaller screens, use the 'Add Album' button.
+
+Modal Album Search: Search for albums via a modal to add to your ranking list.
+
+Preview and Share: Preview your album ranking, and choose whether to display your name to personalize the title.
+
+
+## Technologies Used
+React
+Vite
+Tailwind CSS
+
+[Project Link](https://myalbumsranking.vercel.app/)
+
