@@ -11,14 +11,14 @@ export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-gray-100 p-5 rounded-lg">
+      <div className="bg-gray-100 dark:bg-black p-5 rounded">
         <div className="relative flex items-center gap-2">
           <input
             type="text"
             placeholder="Search for an album"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border border-gray-300 bg-transparent rounded px-4 py-1  text-sm focus:ring-black"
+            className="border border-gray-300/20 bg-slate-100 dark:border-gray-400/10 dark:bg-black/30 dark:focus:border-black/20 rounded px-4 py-1 w-full  text-sm"
           />
           <IoSearch className="absolute top-2 text-sm right-12 text-gray-400" />
           <button
@@ -52,9 +52,10 @@ export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
         <div className="flex items-center mt-4 gap-4">
           <button
             onClick={loadMoreAlbums}
-            className="bg-primary text-white px-4 py-2 rounded text-xs flex items-center gap-1 "
+            className="dark:bg-slate-100 bg-black text-white dark:text-black px-4 py-2 rounded text-xs flex items-center gap-1 "
+            title='Load More'
           >
-            <PiSpinnerBold /> Load more
+            <PiSpinnerBold className="text-lg" />
           </button>
         </div>
       </div>

@@ -12,10 +12,8 @@ const Navbar = () => {
     setDarkMode(!darkMode)
   }
 
-  console.log(darkMode)
-
   return (
-    <div className="md:px-10 px-3 py-2">
+    <div className="md:px-10 px-3 py-3">
       <nav className="fixed w-11/12 bg-slate-100 dark:bg-black/10 shadow dark:shadow-black/50 p-2 flex justify-between items-center rounded">
         <div className="flex items-center gap-2">
           <img src='logo2.png' className="w-6" />

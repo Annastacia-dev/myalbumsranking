@@ -65,7 +65,7 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
   return (
     <li
       ref={(node) => drag(drop(node))}
-      className={`mb-2 border border-gray-300 rounded p-1 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-secondary/20" : ""}`}
+      className={`mb-2 border border-gray-300 dark:border-black/20 rounded p-1 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-secondary/20" : ""}`}
     >
       {album ? (
         <div className="flex items-center gap-3 relative">
@@ -74,8 +74,8 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
             alt={album.name}
             className="rounded w-20 object-cover"
           />
-          <div className="flex flex-col gap-1 md:text-sm text-xs">
-            <p className="font-semibold md:w-3/4">{album.name}</p>
+          <div className="flex flex-col gap-1  text-xs">
+            <p className="font-semibold">{album.name}</p>
             <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
           </div>
           <p className="font-black absolute opacity-50 right-1 bottom-0 md:text-sm text-xs">
@@ -105,6 +105,8 @@ const Ranking = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(null);
+
+  const nullRankings = rankings.filter(ranking => ranking === null).length
 
   useEffect(() => {
     localStorage.setItem("rankings", JSON.stringify(rankings));
@@ -154,21 +156,24 @@ const Ranking = () => {
     });
   };
 
+  const currentYear = new Date().getFullYear()
+
   return (
-    <div className="flex flex-col p-5 ">
+    <div className="flex flex-col px-5">
       <div className="flex justify-between">
         <p></p>
         <button
           onClick={downloadRanking}
-          className={`mt-4 ${rankings.length < 5 ? "" : "bg-primary"} text-white rounded px-4 py-2`}
-          disabled={rankings.length < 5}
+          className={`mt-4 ${nullRankings > 0 ? "bg-slate-300/10 dark:bg-black/10" : "bg-slate-200 dark:bg-black/30 dark:text-white"}  rounded px-3 py-2`}
+          disabled={nullRankings > 0 }
+          title="Download"
         >
-          <MdOutlineFileDownload className="text-xl" />
+          <MdOutlineFileDownload className="text-lg" />
         </button>
       </div>
-      <div id="ranking" className="p-2 flex flex-col gap-3">
-        <h2 className="text-base uppercase font-semibold ml-2">
-          My Album Rankings
+      <div id="ranking" className="flex flex-col gap-3 md:-mt-1">
+        <h2 className="text-sm uppercase font-semibold ml-2">
+          My {currentYear} Album Rankings
         </h2>
         <ul className="flex flex-col md:gap-0 gap-4">
           {rankings.map((album, index) => (
