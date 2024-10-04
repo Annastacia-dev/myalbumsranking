@@ -6,7 +6,10 @@ const clientSecret1 = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
 const clientId2 = import.meta.env.VITE_SPOTIFY_CLIENT_ID_2;
 const clientSecret2 = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET_2;
 
-const useFetchAlbums = (searchQuery = "", currentYear = new Date().getFullYear()) => {
+const useFetchAlbums = (
+  searchQuery = "",
+  currentYear = new Date().getFullYear(),
+) => {
   const [accessToken, setAccessToken] = useState("");
   const [albums, setAlbums] = useState([]);
   const [error, setError] = useState("");
@@ -20,7 +23,8 @@ const useFetchAlbums = (searchQuery = "", currentYear = new Date().getFullYear()
 
   const fetchAccessToken = async () => {
     const clientId = activeCredentials === 1 ? clientId1 : clientId2;
-    const clientSecret = activeCredentials === 1 ? clientSecret1 : clientSecret2;
+    const clientSecret =
+      activeCredentials === 1 ? clientSecret1 : clientSecret2;
 
     const authString = `${clientId}:${clientSecret}`;
     const base64 = btoa(authString);
@@ -73,7 +77,7 @@ const useFetchAlbums = (searchQuery = "", currentYear = new Date().getFullYear()
         fetchedAlbums = response.data.albums.items;
 
         const newFullAlbums = fetchedAlbums.filter(
-          (album) => album && album.album_type === "album"
+          (album) => album && album.album_type === "album",
         );
 
         fullAlbums = [...fullAlbums, ...newFullAlbums];
@@ -119,7 +123,7 @@ const useFetchAlbums = (searchQuery = "", currentYear = new Date().getFullYear()
 
   useEffect(() => {
     fetchAccessToken();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCredentials]); // Re-fetch access token when credentials change
 
   useEffect(() => {

@@ -56,7 +56,7 @@ const Albums = () => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-       {loading && <Loader />}
+      {loading && <Loader />}
       {!loading && filteredAlbums.length === 0 ? (
         <p className="text-center text-red-500">No albums found</p> // Display not found message
       ) : (

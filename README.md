@@ -14,11 +14,10 @@ Modal Album Search: Search for albums via a modal to add to your ranking list.
 
 Preview and Share: Preview your album ranking, and choose whether to display your name to personalize the title.
 
-
 ## Technologies Used
+
 React
 Vite
 Tailwind CSS
 
 [Project Link](https://myalbumsranking.vercel.app/)
-
