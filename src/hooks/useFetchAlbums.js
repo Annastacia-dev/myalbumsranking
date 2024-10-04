@@ -15,6 +15,9 @@ const useFetchAlbums = (
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
+  const MIN_ALBUM_COUNT = 12; // Ensures at least 12 albums are displayed
+  const LIMIT = 50; // Spotify API limit per request
+
   // Fetch access token from Spotify API
   const fetchAccessToken = async () => {
     const authString = `${clientId}:${clientSecret}`;
@@ -46,62 +49,50 @@ const useFetchAlbums = (
   // Fetch albums from Spotify API
   const fetchAlbums = async () => {
     if (!accessToken) return;
-
     setLoading(true);
-    const limit = 50;
 
     try {
-      const response = await axios.get(`https://api.spotify.com/v1/search`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params: {
-          q: `${searchQuery ? `${searchQuery} ` : ""}year:${currentYear}`,
-          type: "album",
-          limit: limit,
-          offset: offset,
-        },
-      });
+      let fetchedAlbums = [];
+      let fullAlbums = [];
+      let currentOffset = offset;
 
-      let fetchedAlbums = response.data.albums.items;
+      // Loop until we have at least 12 albums of type "album"
+      while (fullAlbums.length < MIN_ALBUM_COUNT && hasMore) {
+        const response = await axios.get(`https://api.spotify.com/v1/search`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          params: {
+            q: `${searchQuery ? `${searchQuery} ` : ""}year:${currentYear}`,
+            type: "album",
+            limit: LIMIT,
+            offset: currentOffset,
+          },
+        });
 
-      // Filter out singles
-      const fullAlbums = fetchedAlbums.filter(
-        (album) => album && album.album_type === "album",
-      );
+        fetchedAlbums = response.data.albums.items;
 
-      // Fetch track data to sum popularity
-      const albumsWithTrackData = await Promise.all(
-        fullAlbums.map(async (album) => {
-          const tracksResponse = await axios.get(
-            `https://api.spotify.com/v1/albums/${album.id}/tracks`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            },
-          );
+        // Filter out singles
+        const newFullAlbums = fetchedAlbums.filter(
+          (album) => album && album.album_type === "album",
+        );
 
-          const tracks = tracksResponse.data.items;
-          let totalPopularity = 0;
+        fullAlbums = [...fullAlbums, ...newFullAlbums];
+        currentOffset += LIMIT;
 
-          for (let track of tracks) {
-            totalPopularity += track.popularity;
-          }
-
-          return { ...album, totalPopularity };
-        }),
-      );
-
-      // Sort by total popularity
-      albumsWithTrackData.sort((a, b) => b.totalPopularity - a.totalPopularity);
+        // If no more albums to fetch, stop the loop
+        if (fetchedAlbums.length < LIMIT) {
+          setHasMore(false);
+          break;
+        }
+      }
 
       // Update state with the new albums
-      if (albumsWithTrackData.length === 0) {
+      if (fullAlbums.length === 0) {
         setHasMore(false);
       } else {
         setAlbums((prevAlbums) => {
-          const allAlbums = [...prevAlbums, ...albumsWithTrackData];
+          const allAlbums = [...prevAlbums, ...fullAlbums];
           const uniqueAlbums = allAlbums.filter(
             (album, index, self) =>
               index === self.findIndex((a) => a.id === album.id),
@@ -120,7 +111,7 @@ const useFetchAlbums = (
   // Load more albums
   const loadMoreAlbums = () => {
     if (albums.length < 1000) {
-      setOffset((prevOffset) => prevOffset + 50);
+      setOffset((prevOffset) => prevOffset + LIMIT);
     }
   };
 
@@ -130,16 +121,15 @@ const useFetchAlbums = (
 
   useEffect(() => {
     if (accessToken) {
-      // Reset albums when searchQuery is empty
       if (searchQuery === "") {
         setAlbums([]);
-        setHasMore(true); // Reset hasMore to true to allow for new searches
       } else {
         setAlbums([]);
         setOffset(0);
       }
       fetchAlbums();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, searchQuery, offset]);
 
   return { albums, loading, error, hasMore, loadMoreAlbums };
