@@ -18,7 +18,7 @@ export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
             placeholder="Search for an album"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border border-gray-300/20 bg-slate-100 dark:border-gray-400/10 dark:bg-black/30 dark:focus:border-black/20 rounded px-4 py-1 w-full  text-sm"
+            className="border border-gray-300/20 bg-slate-100 dark:border-white/10 dark:bg-white/10 rounded px-4 py-1 w-full  text-sm"
           />
           <IoSearch className="absolute top-2 text-sm right-12 text-gray-400" />
           <button

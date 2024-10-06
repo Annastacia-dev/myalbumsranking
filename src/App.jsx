@@ -7,7 +7,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 function App() {
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="bg-slate-50 dark:bg-black/90 dark:text-white min-h-screen">
+      <div className="bg-slate-50 dark:bg-black dark:text-white min-h-screen">
       <Navbar />
       <div className=" grid md:grid-cols-2 mt-12 md:px-10 gap-10">
         <Albums />

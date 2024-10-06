@@ -65,7 +65,7 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
   return (
     <li
       ref={(node) => drag(drop(node))}
-      className={`mb-2 border border-gray-300 dark:border-black/20 rounded p-1 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-secondary/20" : ""}`}
+      className={`mb-2 border border-gray-300 dark:border-white/10 rounded p-1 ${isDragging ? "opacity-50" : ""} ${isOver ? "bg-secondary/20" : ""}`}
     >
       {album ? (
         <div className="flex items-center gap-3 relative">
@@ -78,7 +78,7 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
             <p className="font-semibold">{album.name}</p>
             <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
           </div>
-          <p className="font-black absolute opacity-50 right-1 bottom-0 md:text-sm text-xs">
+          <p className="font-black absolute opacity-50 right-1 bottom-1 md:text-sm text-xs">
             {index + 1}
           </p>
         </div>
@@ -159,19 +159,19 @@ const Ranking = () => {
   const currentYear = new Date().getFullYear()
 
   return (
-    <div className="flex flex-col px-5">
+    <div className="flex flex-col md:px-5">
       <div className="flex justify-between">
         <p></p>
         <button
           onClick={downloadRanking}
-          className={`mt-4 ${nullRankings > 0 ? "bg-slate-300/10 dark:bg-black/10" : "bg-slate-200 dark:bg-black/30 dark:text-white"}  rounded px-3 py-2`}
+          className={`mb-2 ${nullRankings > 0 ? "bg-slate-300/10 dark:bg-black/10" : "bg-slate-200 dark:bg-white/10 dark:text-white"}  rounded px-3 py-2`}
           disabled={nullRankings > 0 }
           title="Download"
         >
           <MdOutlineFileDownload className="text-lg" />
         </button>
       </div>
-      <div id="ranking" className="flex flex-col gap-3 md:-mt-1">
+      <div id="ranking" className="flex flex-col gap-3 md:-mt-1 bg-slate-50 dark:bg-black px-3 py-2">
         <h2 className="text-sm uppercase font-semibold ml-2">
           My {currentYear} Album Rankings
         </h2>

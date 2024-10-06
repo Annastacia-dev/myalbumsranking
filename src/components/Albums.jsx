@@ -54,7 +54,7 @@ const Albums = () => {
         <input
           type="text"
           placeholder="Search albums..."
-          className="border border-gray-300/20 bg-slate-100 dark:border-black/10 dark:bg-black/30 dark:focus:border-black/20 rounded p-2 mb-4 w-full  text-sm"
+          className="border border-gray-300/20 bg-slate-100 dark:border-white/10 dark:bg-white/10 dark:focus:border-black/20 rounded p-2 mb-4 w-full  text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -74,7 +74,7 @@ const Albums = () => {
           <div className="flex items-center mt-4 gap-4">
             <button
               onClick={loadMoreAlbums}
-              className="bg-slate-200 dark:bg-black/30  dark:text-white px-4 py-2 rounded md:text-xs text-xs flex items-center gap-1 "
+              className="bg-slate-200 dark:bg-white/10 dark:text-white px-4 py-2 rounded md:text-xs text-xs flex items-center gap-1 "
               title="Load More"
             >
               <PiSpinnerBold className="text-lg" />
