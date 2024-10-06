@@ -3,10 +3,11 @@ import { useDrag, useDrop } from "react-dnd";
 import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
 import { AlbumSearchModal } from "./AlbumSearchModal";
-import { MdOutlineFileDownload, MdAdd } from "react-icons/md";
+import { MdOutlineFileDownload, MdAdd, MdDelete } from "react-icons/md";
 import PropTypes from "prop-types";
+import { HiSwitchVertical } from "react-icons/hi";
 
-const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
+const RankingPosition = ({ album, index, moveAlbum, addAlbum, openReplaceModal, deleteAlbum, openModal }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "ALBUM_RANK",
     item: { index },
@@ -74,13 +75,17 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openModal }) => {
             alt={album.name}
             className="rounded w-20 object-cover"
           />
-          <div className="flex flex-col gap-1  text-xs">
-            <p className="font-semibold">{album.name}</p>
+          <div className="flex flex-col gap-1  text-[10px]">
+            <p className="font-semibold md:w-full w-1/2">{album.name}</p>
             <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
           </div>
           <p className="font-black absolute opacity-50 right-1 bottom-1 md:text-sm text-xs">
             {index + 1}
           </p>
+          <div className="absolute top-1 right-2 md:hidden flex items-center gap-2">
+            <HiSwitchVertical className="cursor-pointer" onClick={() => openReplaceModal(index)} />
+            <MdDelete className="cursor-pointer" onClick={() => deleteAlbum(index)} />
+          </div>
         </div>
       ) : (
         <div>
@@ -131,6 +136,19 @@ const Ranking = () => {
     }
   };
 
+  const openReplaceModal = (index) => {
+    setCurrentIndex(index);
+    setIsModalOpen(true);
+  };
+
+
+  const deleteAlbum = (index) => {
+    const newRankings = [...rankings];
+    newRankings[index] = null;
+    setRankings(newRankings);
+  };
+
+
   const openModal = (index) => {
     setCurrentIndex(index);
     setIsModalOpen(true);
@@ -142,7 +160,16 @@ const Ranking = () => {
 
   const handleAlbumSelect = (album) => {
     if (currentIndex !== null) {
-      addAlbum(currentIndex, album);
+      const isDuplicate = rankings.some((a) => a && a.id === album.id);
+
+      if (!isDuplicate) {
+        const newRankings = [...rankings];
+        newRankings[currentIndex] = album;
+        setRankings(newRankings);
+      } else {
+        alert("This album is already in the rankings!");
+      }
+
       closeModal();
     }
   };
@@ -183,6 +210,8 @@ const Ranking = () => {
               album={album}
               moveAlbum={moveAlbum}
               addAlbum={addAlbum}
+              openReplaceModal={openReplaceModal}
+              deleteAlbum={deleteAlbum}
               openModal={openModal}
             />
           ))}
@@ -217,6 +246,8 @@ RankingPosition.propTypes = {
   index: PropTypes.number,
   moveAlbum: PropTypes.func,
   addAlbum: PropTypes.func,
+  openReplaceModal: PropTypes.func,
+  deleteAlbum: PropTypes.func,
   openModal: PropTypes.func,
 };
 
