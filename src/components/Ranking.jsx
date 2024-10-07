@@ -11,8 +11,6 @@ import {
 } from "react-icons/md";
 import PropTypes from "prop-types";
 import { HiSwitchVertical } from "react-icons/hi";
-import { FaXTwitter, FaWhatsapp } from "react-icons/fa6";
-import { FaSnapchatGhost } from "react-icons/fa";
 
 const RankingPosition = ({
   album,
@@ -22,6 +20,7 @@ const RankingPosition = ({
   openReplaceModal,
   deleteAlbum,
   openModal,
+  isCapturing,
 }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "ALBUM_RANK",
@@ -94,19 +93,21 @@ const RankingPosition = ({
             <p className="font-semibold md:w-full w-1/2">{album.name}</p>
             <p>{album.artists.map((artist) => artist.name).join(", ")}</p>
           </div>
-          <p className="font-black absolute opacity-50 right-1 bottom-1 md:text-sm text-xs">
+          <p className="font-black absolute opacity-50 right-1 bottom-2 md:text-sm text-xs">
             {index + 1}
           </p>
-          <div className="absolute top-1 right-2 md:hidden flex items-center gap-2">
-            <HiSwitchVertical
-              className="cursor-pointer"
-              onClick={() => openReplaceModal(index)}
-            />
-            <MdDelete
-              className="cursor-pointer"
-              onClick={() => deleteAlbum(index)}
-            />
-          </div>
+          {!isCapturing && (
+            <div className="absolute top-1 right-2 md:hidden flex items-center gap-2">
+              <HiSwitchVertical
+                className="cursor-pointer"
+                onClick={() => openReplaceModal(index)}
+              />
+              <MdDelete
+                className="cursor-pointer"
+                onClick={() => deleteAlbum(index)}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div>
@@ -131,9 +132,7 @@ const Ranking = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   const nullRankings = rankings.filter((ranking) => ranking === null).length;
   const currentYear = new Date().getFullYear();
@@ -198,12 +197,14 @@ const Ranking = () => {
   };
 
   const captureRankingImage = async () => {
+    setIsCapturing(true);
     const rankingElement = document.getElementById("ranking");
     const canvas = await html2canvas(rankingElement, { scale: 2 });
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
         const file = new File([blob], "ranking.png", { type: "image/png" });
         resolve(file);
+        setIsCapturing(false);
       });
     });
   };
@@ -212,64 +213,26 @@ const Ranking = () => {
     captureRankingImage().then((file) => saveAs(file, "album-ranking.png"));
   };
 
-  const shareToPlatform = async (platform) => {
-    const file = await captureRankingImage(); // Capture the image as a file
-    const currentYear = new Date().getFullYear();
+  const shareRanking = async () => {
+    const file = await captureRankingImage();
     const shareText = `Check out my ${currentYear} album rankings!`;
 
-    if (platform === "twitter") {
-      // Twitter does not support image sharing through URL; fallback to text sharing
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`;
-      window.open(twitterUrl, "_blank");
-    } else if (platform === "whatsapp") {
-      // WhatsApp web does not support image sharing via URL, but works on mobile with the Web Share API
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator
+        .share({
           title: "My Album Rankings",
           text: shareText,
           files: [file],
-        }).catch((error) => console.error("Error sharing to WhatsApp", error));
-      } else {
-        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}%20${encodeURIComponent(window.location.href)}`;
-        window.open(whatsappUrl, "_blank");
-      }
-    } else if (platform === "snapchat") {
-      // Snapchat supports Web Share API on mobile
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
-          title: "My Album Rankings",
-          text: shareText,
-          files: [file],
-        }).catch((error) => console.error("Error sharing to Snapchat", error));
-      } else {
-        alert("Snapchat sharing is only supported on mobile.");
-      }
+        })
+        .catch((error) => console.error("Error sharing", error));
     } else {
-      alert("This platform does not support image sharing.");
+      alert("Sharing is not supported on this device.");
     }
   };
 
-  const isShareApiSupported = navigator.canShare ? true : false;
-
-
-  const sharePlatforms = [
-    {
-      title: "whatsapp",
-      icon: <FaWhatsapp />,
-    },
-    {
-      title: "twitter",
-      icon: <FaXTwitter />,
-    },
-    {
-      title: "snapchat",
-      icon: <FaSnapchatGhost />,
-    }
-  ];
-
   return (
     <div className="flex flex-col md:px-5">
-      <div className="flex justify-between">
+      <div className="flex justify-between md:px-0 px-4">
         <p></p>
         <div className="flex items-center gap-2 relative">
           <button
@@ -281,27 +244,12 @@ const Ranking = () => {
             <MdOutlineFileDownload className="text-lg" />
           </button>
           <button
-            onClick={toggleDropdown}
+            onClick={shareRanking}
             className="bg-slate-200 dark:bg-white/10 dark:text-white rounded px-3 py-2 mb-2"
             title="Share"
           >
             <MdShare />
           </button>
-          {isDropdownOpen && (
-            <div className="absolute right-0 top-10 mt-2 w-40 bg-white dark:bg-black border dark:border-white/10 shadow-lg rounded md:text-sm text-xs z-10">
-              <ul className="py-1">
-                {sharePlatforms.map(({title, icon}) => (
-                  <li
-                    key={title}
-                    className={`px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer items-center gap-2 capitalize flex`}
-                    onClick={() => shareToPlatform(title)}
-                  >
-                    {icon} {title}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
       <div
@@ -322,6 +270,7 @@ const Ranking = () => {
               openReplaceModal={openReplaceModal}
               deleteAlbum={deleteAlbum}
               openModal={openModal}
+              isCapturing={isCapturing}
             />
           ))}
         </ul>
@@ -358,6 +307,7 @@ RankingPosition.propTypes = {
   openReplaceModal: PropTypes.func,
   deleteAlbum: PropTypes.func,
   openModal: PropTypes.func,
+  isCapturing: PropTypes.func,
 };
 
 export default Ranking;
