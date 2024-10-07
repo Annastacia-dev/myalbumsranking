@@ -8,11 +8,11 @@ function App() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="bg-slate-50 dark:bg-black dark:text-white min-h-screen">
-      <Navbar />
-      <div className=" grid md:grid-cols-2 mt-12 md:px-10 gap-10">
-        <Albums />
-        <Ranking />
-      </div>
+        <Navbar />
+        <div className=" grid md:grid-cols-2 mt-12 md:px-10 gap-10">
+          <Albums />
+          <Ranking />
+        </div>
       </div>
     </DndProvider>
   );

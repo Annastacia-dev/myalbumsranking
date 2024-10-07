@@ -53,7 +53,7 @@ export const AlbumSearchModal = ({ addAlbum, closeModal }) => {
           <button
             onClick={loadMoreAlbums}
             className="dark:bg-slate-100 bg-black text-white dark:text-black px-4 py-2 rounded text-xs flex items-center gap-1 "
-            title='Load More'
+            title="Load More"
           >
             <PiSpinnerBold className="text-lg" />
           </button>

@@ -3,11 +3,26 @@ import { useDrag, useDrop } from "react-dnd";
 import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
 import { AlbumSearchModal } from "./AlbumSearchModal";
-import { MdOutlineFileDownload, MdAdd, MdDelete } from "react-icons/md";
+import {
+  MdOutlineFileDownload,
+  MdAdd,
+  MdDelete,
+  MdShare,
+} from "react-icons/md";
 import PropTypes from "prop-types";
 import { HiSwitchVertical } from "react-icons/hi";
+import { FaXTwitter, FaWhatsapp } from "react-icons/fa6";
+import { FaSnapchatGhost } from "react-icons/fa";
 
-const RankingPosition = ({ album, index, moveAlbum, addAlbum, openReplaceModal, deleteAlbum, openModal }) => {
+const RankingPosition = ({
+  album,
+  index,
+  moveAlbum,
+  addAlbum,
+  openReplaceModal,
+  deleteAlbum,
+  openModal,
+}) => {
   const [{ isDragging }, drag] = useDrag({
     type: "ALBUM_RANK",
     item: { index },
@@ -83,8 +98,14 @@ const RankingPosition = ({ album, index, moveAlbum, addAlbum, openReplaceModal, 
             {index + 1}
           </p>
           <div className="absolute top-1 right-2 md:hidden flex items-center gap-2">
-            <HiSwitchVertical className="cursor-pointer" onClick={() => openReplaceModal(index)} />
-            <MdDelete className="cursor-pointer" onClick={() => deleteAlbum(index)} />
+            <HiSwitchVertical
+              className="cursor-pointer"
+              onClick={() => openReplaceModal(index)}
+            />
+            <MdDelete
+              className="cursor-pointer"
+              onClick={() => deleteAlbum(index)}
+            />
           </div>
         </div>
       ) : (
@@ -110,8 +131,12 @@ const Ranking = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const nullRankings = rankings.filter(ranking => ranking === null).length
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+
+  const nullRankings = rankings.filter((ranking) => ranking === null).length;
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     localStorage.setItem("rankings", JSON.stringify(rankings));
@@ -141,13 +166,11 @@ const Ranking = () => {
     setIsModalOpen(true);
   };
 
-
   const deleteAlbum = (index) => {
     const newRankings = [...rankings];
     newRankings[index] = null;
     setRankings(newRankings);
   };
-
 
   const openModal = (index) => {
     setCurrentIndex(index);
@@ -174,31 +197,117 @@ const Ranking = () => {
     }
   };
 
-  const downloadRanking = () => {
+  const captureRankingImage = async () => {
     const rankingElement = document.getElementById("ranking");
-    html2canvas(rankingElement, { scale: 2 }).then((canvas) => {
+    const canvas = await html2canvas(rankingElement, { scale: 2 });
+    return new Promise((resolve) => {
       canvas.toBlob((blob) => {
-        saveAs(blob, "album-ranking.png");
+        const file = new File([blob], "ranking.png", { type: "image/png" });
+        resolve(file);
       });
     });
   };
 
-  const currentYear = new Date().getFullYear()
+  const downloadRanking = () => {
+    captureRankingImage().then((file) => saveAs(file, "album-ranking.png"));
+  };
+
+  const shareToPlatform = async (platform) => {
+    const file = await captureRankingImage(); // Capture the image as a file
+    const currentYear = new Date().getFullYear();
+    const shareText = `Check out my ${currentYear} album rankings!`;
+
+    if (platform === "twitter") {
+      // Twitter does not support image sharing through URL; fallback to text sharing
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(window.location.href)}`;
+      window.open(twitterUrl, "_blank");
+    } else if (platform === "whatsapp") {
+      // WhatsApp web does not support image sharing via URL, but works on mobile with the Web Share API
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          title: "My Album Rankings",
+          text: shareText,
+          files: [file],
+        }).catch((error) => console.error("Error sharing to WhatsApp", error));
+      } else {
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}%20${encodeURIComponent(window.location.href)}`;
+        window.open(whatsappUrl, "_blank");
+      }
+    } else if (platform === "snapchat") {
+      // Snapchat supports Web Share API on mobile
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          title: "My Album Rankings",
+          text: shareText,
+          files: [file],
+        }).catch((error) => console.error("Error sharing to Snapchat", error));
+      } else {
+        alert("Snapchat sharing is only supported on mobile.");
+      }
+    } else {
+      alert("This platform does not support image sharing.");
+    }
+  };
+
+  const isShareApiSupported = navigator.canShare ? true : false;
+
+
+  const sharePlatforms = [
+    {
+      title: "whatsapp",
+      icon: <FaWhatsapp />,
+    },
+    {
+      title: "twitter",
+      icon: <FaXTwitter />,
+    },
+    {
+      title: "snapchat",
+      icon: <FaSnapchatGhost />,
+    }
+  ];
 
   return (
     <div className="flex flex-col md:px-5">
       <div className="flex justify-between">
         <p></p>
-        <button
-          onClick={downloadRanking}
-          className={`mb-2 ${nullRankings > 0 ? "bg-slate-300/10 dark:bg-black/10" : "bg-slate-200 dark:bg-white/10 dark:text-white"}  rounded px-3 py-2`}
-          disabled={nullRankings > 0 }
-          title="Download"
-        >
-          <MdOutlineFileDownload className="text-lg" />
-        </button>
+        <div className="flex items-center gap-2 relative">
+          <button
+            onClick={downloadRanking}
+            className={`mb-2 ${nullRankings > 0 ? "bg-slate-300/10 dark:bg-black/10" : "bg-slate-200 dark:bg-white/10 dark:text-white"}  rounded px-3 py-2`}
+            disabled={nullRankings > 0}
+            title="Download"
+          >
+            <MdOutlineFileDownload className="text-lg" />
+          </button>
+          <button
+            onClick={toggleDropdown}
+            className="bg-slate-200 dark:bg-white/10 dark:text-white rounded px-3 py-2 mb-2"
+            title="Share"
+          >
+            <MdShare />
+          </button>
+          {isDropdownOpen && (
+            <div className="absolute right-0 top-10 mt-2 w-40 bg-white dark:bg-black border dark:border-white/10 shadow-lg rounded md:text-sm text-xs z-10">
+              <ul className="py-1">
+                {sharePlatforms.map(({title, icon}) => (
+                  <li
+                    key={title}
+                    className={`px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer items-center gap-2 capitalize flex`}
+                    onClick={() => shareToPlatform(title)}
+                  >
+                    {icon} {title}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
-      <div id="ranking" className="flex flex-col gap-3 md:-mt-1 bg-slate-50 dark:bg-black px-3 py-2">
+      <div
+        id="ranking"
+        className="flex flex-col gap-3 md:-mt-1 bg-slate-50 dark:bg-black px-3 py-2"
+      >
         <h2 className="text-sm uppercase font-semibold ml-2">
           My {currentYear} Album Rankings
         </h2>

@@ -26,7 +26,7 @@ const DarkModeProvider = ({ children }) => {
 };
 
 DarkModeProvider.prototypes = {
-  children: PropTypes.any
-}
+  children: PropTypes.any,
+};
 
 export { DarkModeContext, DarkModeProvider };
