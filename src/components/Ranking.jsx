@@ -245,7 +245,7 @@ const Ranking = () => {
           </button>
           <button
             onClick={shareRanking}
-            className="bg-slate-200 dark:bg-white/10 dark:text-white rounded px-3 py-2 mb-2"
+            className="bg-slate-200 dark:bg-white/10 dark:text-white rounded px-3 py-2 mb-2 md:hidden"
             title="Share"
           >
             <MdShare />
