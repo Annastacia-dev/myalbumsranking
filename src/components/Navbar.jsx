@@ -1,11 +1,13 @@
-import { useContext } from "react";
+import { useState, useContext } from "react";
 import { DarkModeContext } from "../contexts/DarkMode";
 import { FaRegLightbulb, FaLightbulb } from "react-icons/fa6";
 import { LuBadgeHelp } from "react-icons/lu";
 import { MdOutlineFeedback } from "react-icons/md";
+import Tutorial from "./Tutorial";
 
 const Navbar = () => {
   const { darkMode, setDarkMode } = useContext(DarkModeContext);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const switchMode = () => {
     setDarkMode(!darkMode);
@@ -22,13 +24,18 @@ const Navbar = () => {
           </p>
         </div>
         <div className="flex items-center md:gap-8 gap-4 md:text-lg text-sm">
-          <LuBadgeHelp />
-          <MdOutlineFeedback />
+          <LuBadgeHelp
+            className="cursor-pointer"
+            onClick={() => setShowTutorial(!showTutorial)}
+          />
+          <MdOutlineFeedback className="cursor-pointer" />
           <button onClick={switchMode}>
             {darkMode ? <FaRegLightbulb /> : <FaLightbulb />}
           </button>
         </div>
       </nav>
+
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
     </div>
   );
 };
