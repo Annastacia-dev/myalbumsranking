@@ -10,7 +10,9 @@ const Tutorial = ({ onClose }) => {
           <p className="mb-2">
             1. Drag albums from the list to the ranking section.
           </p>
-
+          <p className="mb-2">
+            2. Adjust rankings by dragging albums within the ranking list.
+          </p>
           <img
             src="desktoptutorial.png"
             alt="Desktop Tutorial"
